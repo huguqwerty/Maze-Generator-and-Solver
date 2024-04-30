@@ -1,0 +1,62 @@
+from graphics import GraphWin, Line, Point, color_rgb
+import random
+import numpy as np
+
+# Initialization parameters
+maze_size = 20  # Size of the maze (maze_size x maze_size)
+window_size = 600  # Size of the graphics window in pixels
+
+def draw_maze(maze, win):
+    cell_size = window_size / (maze_size * 2 + 1)
+    for y in range(maze_size * 2 + 1):
+        for x in range(maze_size * 2 + 1):
+            if maze[y][x] == 1:  # Wall
+                line = Line(Point(x * cell_size, y * cell_size), Point((x + 1) * cell_size, (y + 1) * cell_size))
+                line.draw(win)
+            elif maze[y][x] == 2:  # Trail
+                center = Point((x + 0.5) * cell_size, (y + 0.5) * cell_size)
+                trail = Line(center, center)  # A point represented as a line for simplicity
+                trail.setOutline(color_rgb(255, 0, 0))  # Red trail
+                trail.draw(win)
+
+def generate_maze_dfs(x, y, maze):
+    maze[y][x] = 0  # Mark current cell as visited
+    dirs = [(0, 2), (2, 0), (0, -2), (-2, 0)]
+    random.shuffle(dirs)
+    for dx, dy in dirs:
+        nx, ny = x + dx, y + dy
+        if 0 <= nx < len(maze[0]) and 0 <= ny < len(maze) and maze[ny][nx] == 1:
+            maze[ny][nx] = 0
+            maze[y + dy // 2][x + dx // 2] = 0
+            generate_maze_dfs(nx, ny, maze)
+
+def solve_maze_dfs(x, y, maze, target_x, target_y, win):
+    if x == target_x and y == target_y:  # Reached target
+        return True
+    if maze[y][x] == 0:  # Path
+        maze[y][x] = 2  # Mark as part of solution path
+        draw_maze(maze, win)  # Update visualization
+
+        dirs = [(0, 2), (2, 0), (0, -2), (-2, 0)]
+        for dx, dy in dirs:
+            nx, ny = x + dx // 2, y + dy // 2
+            if 0 <= nx < len(maze) and 0 <= ny < len(maze[0]) and solve_maze_dfs(nx, ny, maze, target_x, target_y, win):
+                return True
+        maze[y][x] = 0  # Unmark if dead end
+    return False
+
+def main():
+    win = GraphWin("Maze", window_size, window_size, autoflush=False)
+    win.setBackground(color_rgb(0, 0, 0))
+
+    while True:
+        maze = np.ones((maze_size * 2 + 1, maze_size * 2 + 1), dtype=np.int8)
+        generate_maze_dfs(1, 1, maze, set())
+        solve_maze_dfs(1, 1, maze, maze_size * 2 - 1, maze_size * 2 - 1, win)  # Solve the maze
+        win.getMouse()  # Wait for a mouse click to regenerate
+        win.delete("all")  # Clear the window before drawing new maze
+
+    win.close()
+
+if __name__ == "__main__":
+    main()
