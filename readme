@@ -1,5 +1,5 @@
 This Python program creates and solves mazes visually using depth-first search (DFS) algorithms. 
-It employs the graphics.py library for rendering, numpy for array management, and random for generating random maze pathways.
+It uses the graphics.py library for rendering, numpy for array management, and random for generating random maze pathways.
 The program sets up a graphical window and maze dimensions.
 It randomly creates a solvable maze using a DFS algorithm
 It solves the maze using DFS, marking the path in red.
